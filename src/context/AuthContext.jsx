@@ -39,9 +39,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setAuthError(null);
     try {
-      const activeLang = localStorage.getItem('ng_lang') || 'en';
       const res = await api.post('/auth/login', { email, password });
       if (res.data?.success && res.data?.user) {
+        if (res.data?.token) {
+          localStorage.setItem('ng_token', res.data.token);
+        }
         setUser(res.data.user);
         if (res.data.user.preferences?.language) {
           switchLanguage(res.data.user.preferences.language);
@@ -62,6 +64,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.post('/auth/register', { name, email, password });
       if (res.data?.success && res.data?.user) {
+        if (res.data?.token) {
+          localStorage.setItem('ng_token', res.data.token);
+        }
         setUser(res.data.user);
         if (res.data.user.preferences?.language) {
           switchLanguage(res.data.user.preferences.language);
@@ -83,6 +88,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.warn('Backend logout warning:', err.message);
     } finally {
+      localStorage.removeItem('ng_token');
       setUser(null);
     }
   };

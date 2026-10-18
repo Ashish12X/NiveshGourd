@@ -29,16 +29,24 @@ app.use(
 );
 
 // CORS configuration with credentials support for cookies
-const clientOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
+const clientOrigin = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '');
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g., mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
-      if (origin === clientOrigin || origin === 'http://localhost:5173' || origin === 'http://127.0.0.1:5173') {
+      const cleanOrigin = origin.replace(/\/$/, '');
+      if (
+        cleanOrigin === clientOrigin ||
+        cleanOrigin === 'http://localhost:5173' ||
+        cleanOrigin === 'http://127.0.0.1:5173' ||
+        cleanOrigin === 'http://localhost:3000' ||
+        cleanOrigin.endsWith('.vercel.app') ||
+        cleanOrigin.endsWith('.onrender.com')
+      ) {
         return callback(null, true);
       }
-      return callback(new Error('CORS not allowed for this origin.'));
+      return callback(new Error(`CORS not allowed for origin: ${origin}`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

@@ -55,12 +55,13 @@ export const registerUser = async (req, res, next) => {
     });
 
     // 4. Generate JWT & set HTTP-only cookie
-    generateTokenAndSetCookie(res, user._id);
+    const token = generateTokenAndSetCookie(res, user._id);
 
     return res.status(201).json({
       success: true,
       message: 'Account registered successfully.',
       user: user.toSafeObject('en'),
+      token,
     });
   } catch (error) {
     next(error);
@@ -104,7 +105,7 @@ export const loginUser = async (req, res, next) => {
     }
 
     // Generate JWT & set HTTP-only cookie
-    generateTokenAndSetCookie(res, user._id);
+    const token = generateTokenAndSetCookie(res, user._id);
 
     const preferredLang = user.preferences?.language || 'en';
     await ensureUserLocalizedName(user, preferredLang);
@@ -112,6 +113,7 @@ export const loginUser = async (req, res, next) => {
       success: true,
       message: 'Logged in successfully.',
       user: user.toSafeObject(preferredLang),
+      token,
     });
   } catch (error) {
     next(error);
